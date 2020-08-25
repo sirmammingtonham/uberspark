@@ -40,8 +40,8 @@
 /*
  * NS8250... UART registers.
  */
-#ifndef __COM_H__
-#define __COM_H__
+#ifndef __UOBJRTL_DEBUG_COM_H__
+#define __UOBJRTL_DEBUG_COM_H__
 
 /* 8250 registers #[0-6]. */
 
@@ -368,7 +368,7 @@ static inline void dbg_x86_uart_putc(char ch){
 //		dbg_x86_uart_putc(*s++);
 //}
 
-static inline void xmhfhw_platform_serial_puts(char *buffer){
+static inline void uberspark_uobjrtl_debug__serial_puts(char *buffer){
 	while (*buffer)
 		dbg_x86_uart_putc(*buffer++);
 	/*while (*buffer){
@@ -384,7 +384,7 @@ static inline void xmhfhw_platform_serial_puts(char *buffer){
 
 //initialize UART comms.
 //void dbg_x86_uart_init(char *params){
-static inline void xmhfhw_platform_serial_init(char *params){
+static inline void uberspark_uobjrtl_debug__serial_init(char *params){
 
   //override default UART parameters with the one passed via the
   //command line
@@ -428,7 +428,7 @@ static inline void xmhfhw_platform_serial_init(char *params){
 #endif // __ASSEMBLY__
 
 
-#endif /* __COM_H__ */
+#endif /* __UOBJRTL_DEBUG_COM_H__ */
 
 
 /*

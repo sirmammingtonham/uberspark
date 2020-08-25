@@ -44,8 +44,8 @@
  * @XMHF_LICENSE_HEADER_END@
  */
 
-#ifndef __XMHF_DEBUG_H__
-#define __XMHF_DEBUG_H__
+#ifndef __UOBJRTL_DEBUG_DEBUG_H__
+#define __UOBJRTL_DEBUG_DEBUG_H__
 
 #ifndef __ASSEMBLY__
 
@@ -55,6 +55,10 @@
 //#include <xmhfhw.h>
 
 #include "_com.h"        		//UART/serial
+
+#include <uberspark/include/uberspark.h>
+#include <uberspark/uobjrtl/hw/include/generic/x86_32/intel/hw.h>
+#include <uberspark/uobjrtl/crt/include/stdarg.h>
 
 #define LOG_LEVEL_NONE    0x00
 #define LOG_LEVEL_ALL     0xFF
@@ -70,12 +74,12 @@
 
 #define ENABLED_LOG_TYPES (LOG_PROFILE|LOG_TRACE|LOG_ERROR)
 
-static inline void xmhf_debug_init(char *params){
+static inline void uberspark_uobjrtl_debug__init(char *params){
 	(void)params;
-  xmhfhw_platform_serial_init(params);
+  uberspark_uobjrtl_debug__serial_init(params);
 }
 
-extern __attribute__(( section(".data") )) uint32_t libxmhfdebug_lock;
+extern __attribute__(( section(".data") )) uint32_t debug_lock;
 
 static inline void _XDPRINTF_(const char *fmt, ...){
     va_list       ap;
@@ -83,16 +87,16 @@ static inline void _XDPRINTF_(const char *fmt, ...){
 	char buffer[1024];
 
 	va_start(ap, fmt);
-	retval = vsnprintf(&buffer, 1024, fmt, ap);
-	spin_lock(&libxmhfdebug_lock);
-	xmhfhw_platform_serial_puts(&buffer);
-	spin_unlock(&libxmhfdebug_lock);
+	retval = uberspark_uobjrtl_debug__vsnprintf(&buffer, 1024, fmt, ap);
+	uberspark_uobjrtl_hw__generic_x86_32_intel__spin_lock(&debug_lock);
+	uberspark_uobjrtl_debug__serial_puts(&buffer);
+	uberspark_uobjrtl_hw__generic_x86_32_intel__spin_unlock(&debug_lock);
     va_end(ap);
 }
 
 #else
 
-static inline void xmhf_debug_init(char *params){
+static inline void uberspark_uobjrtl_debug__init(char *params){
 	(void)params;
 }
 
@@ -106,4 +110,4 @@ static inline void xmhf_debug_init(char *params){
 
 #endif	//__ASSEMBLY__
 
-#endif //__XMHF_DEBUG_H__
+#endif //__UOBJRTL_DEBUG_DEBUG_H__

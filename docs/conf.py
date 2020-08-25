@@ -46,7 +46,8 @@ breathe_order_parameters_first = True
 
 breathe_implementation_filename_extensions = ['.c']
 breathe_projects = { "uobjrtl-crt": "_build/breathe/doxygen/uobjrtl-crt/xml/",
-                    "uobjrtl-crypto": "_build/breathe/doxygen/uobjrtl-crypto/xml/" }
+                    "uobjrtl-crypto": "_build/breathe/doxygen/uobjrtl-crypto/xml/",
+                    "uobjrtl-debug": "_build/breathe/doxygen/uobjrtl-debug/xml/" }
 breathe_doxygen_config_options = {'ALIASES':    ( ' details_begin="\par Details ^^ \\verbatim embed:rst:leading-asterisk ^^"'
                                                   ' details_end="\endverbatim ^^"'
                                                   ' headers_begin="\par Headers(s) ^^ \\verbatim embed:rst:leading-asterisk ^^"'
@@ -80,7 +81,9 @@ breathe_projects_source = {
                                                       "include/ciphers/aes/aes.h",
                                                       "include/hashes/sha1/sha1.h",
                                                       "include/mac/hmacsha1/hmacsha1.h"
-                                                        ] )
+                                                        ] ),
+    
+     "uobjrtl-debug" : ( "../src-nextgen/uobjrtl/debug", ["src/subr_prf.c"] )
 
      }
 

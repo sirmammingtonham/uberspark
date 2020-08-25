@@ -43,7 +43,7 @@
  * Amit Vasudevan (amitvasudevan@acm.org)
  */
 
-#include <uberspark.h>
+#include <uberspark/uobjrtl/debug/include/debug.h>
 
 //#include <stdint.h>
 //#include <stdio.h>
@@ -58,7 +58,6 @@ static __inline int imax(int a, int b) { return (a > b ? a : b); }
  * ANSI and traditional C compilers.
  */
 /* #include <machine/stdarg.h> */
-#include <stdarg.h>
 
 /* Max number conversion buffer length: a u_quad_t in base 2, plus NUL byte. */
 #define MAXNBUF	(sizeof(intmax_t) * NBBY + 1)
@@ -77,10 +76,10 @@ struct snprintf_arg {
 	size_t	remain;
 };
 
-static char *ksprintn(char *nbuf, uintmax_t num, int base, int *len, int upper);
-static void  snprintf_func(int ch, void *arg);
+static char *uberspark_uobjrtl_debug__ksprintn(char *nbuf, uintmax_t num, int base, int *len, int upper);
+static void  uberspark_uobjrtl_debug__snprintf_func(int ch, void *arg);
 static int
-kvprintf(char const *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap);
+uberspark_uobjrtl_debug__kvprintf(char const *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap);
 
 
 /*int _XDPRINTF_(const char *fmt, ...){
@@ -105,41 +104,99 @@ int vprintf(const char *fmt, va_list ap){
 	return (retval);
 }*/
 
-
-/*
- * Scaled down version of sprintf(3).
+/** 
+ * @brief Scaled down version of sprintf(3).
+ * 
+ * @param[in] buf
+ * @param[in] cfmt
+ * 
+ * @retval placeholder
+ *  
+ * @details_begin 
+ * @details_end
+ *
+ *  @uobjrtl_namespace{uberspark/uobjrtl/debug}
+ * 
+ * @headers_begin 
+ * #include <uberspark/uobjrtl/crt/include/stdarg.h>
+ * @headers_end
+ * 
+ * @comments_begin
+ * @comments_end
+ * 
+ * 
  */
 int
-sprintf(char *buf, const char *cfmt, ...)
+uberspark_uobjrtl_debug__sprintf(char *buf, const char *cfmt, ...)
 {
 	int retval;
 	va_list ap;
 
 	va_start(ap, cfmt);
-	retval = kvprintf(cfmt, NULL, (void *)buf, 10, ap);
+	retval = uberspark_uobjrtl_debug__kvprintf(cfmt, NULL, (void *)buf, 10, ap);
 	buf[retval] = '\0';
 	va_end(ap);
 	return (retval);
 }
 
-/*
- * Scaled down version of vsprintf(3).
+/** 
+ * @brief Scaled down version of vsprintf(3).
+ * 
+ * @param[in] buf
+ * @param[in] cfmt
+ * @param[in] ap
+ * 
+ * @retval placeholder
+ *  
+ * @details_begin 
+ * @details_end
+ *
+ *  @uobjrtl_namespace{uberspark/uobjrtl/debug}
+ * 
+ * @headers_begin 
+ * #include <uberspark/uobjrtl/crt/include/stdarg.h>
+ * @headers_end
+ * 
+ * @comments_begin
+ * @comments_end
+ * 
+ * 
  */
 int
-vsprintf(char *buf, const char *cfmt, va_list ap)
+uberspark_uobjrtl_debug__vsprintf(char *buf, const char *cfmt, va_list ap)
 {
 	int retval;
 
-	retval = kvprintf(cfmt, NULL, (void *)buf, 10, ap);
+	retval = uberspark_uobjrtl_debug__kvprintf(cfmt, NULL, (void *)buf, 10, ap);
 	buf[retval] = '\0';
 	return (retval);
 }
 
-/*
- * Scaled down version of snprintf(3).
+/** 
+ * @brief Scaled down version of snprintf(3).
+ * 
+ * @param[in] str
+ * @param[in] size
+ * @param[in] format
+ * 
+ * @retval placeholder
+ *  
+ * @details_begin 
+ * @details_end
+ *
+ *  @uobjrtl_namespace{uberspark/uobjrtl/debug}
+ * 
+ * @headers_begin 
+ * #include <uberspark/uobjrtl/crt/include/stdarg.h>
+ * @headers_end
+ * 
+ * @comments_begin
+ * @comments_end
+ * 
+ * 
  */
 int
-snprintf(char *str, size_t size, const char *format, ...)
+uberspark_uobjrtl_debug__snprintf(char *str, size_t size, const char *format, ...)
 {
 	int retval;
 	va_list ap;
@@ -150,42 +207,86 @@ snprintf(char *str, size_t size, const char *format, ...)
 	return(retval);
 }
 
-/*
- * Scaled down version of vsnprintf(3).
+/** 
+ * @brief Scaled down version of vsnprintf(3).
+ * 
+ * @param[in] str
+ * @param[in] size
+ * @param[in] format
+ * @param[in] ap
+ * 
+ * @retval placeholder
+ *  
+ * @details_begin 
+ * @details_end
+ *
+ *  @uobjrtl_namespace{uberspark/uobjrtl/debug}
+ * 
+ * @headers_begin 
+ * #include <uberspark/uobjrtl/crt/include/stdarg.h>
+ * @headers_end
+ * 
+ * @comments_begin
+ * @comments_end
+ * 
+ * 
  */
 int
-vsnprintf(char *str, size_t size, const char *format, va_list ap)
+uberspark_uobjrtl_debug__vsnprintf(char *str, size_t size, const char *format, va_list ap)
 {
 	struct snprintf_arg info;
 	int retval;
 
 	info.str = str;
 	info.remain = size;
-	retval = kvprintf(format, snprintf_func, &info, 10, ap);
+	retval = uberspark_uobjrtl_debug__kvprintf(format, uberspark_uobjrtl_debug__snprintf_func, &info, 10, ap);
 	if (info.remain >= 1)
 		*info.str++ = '\0';
 	return (retval);
 }
 
-/*
- * Kernel version which takes radix argument vsnprintf(3).
+/** 
+ * @brief Kernel version which takes radix argument vsnprintf(3).
+ * 
+ * @param[in] str
+ * @param[in] size
+ * @param[in] radix
+ * @param[in] format
+ * @param[in] ap
+ * 
+ * @retval placeholder
+ *  
+ * @details_begin 
+ * @details_end
+ *
+ *  @uobjrtl_namespace{uberspark/uobjrtl/debug}
+ * 
+ * @headers_begin 
+ * #include <uberspark/uobjrtl/crt/include/stdarg.h>
+ * @headers_end
+ * 
+ * @comments_begin
+ * @comments_end
+ * 
+ * 
  */
 int
-vsnrprintf(char *str, size_t size, int radix, const char *format, va_list ap)
+uberspark_uobjrtl_debug__vsnrprintf(char *str, size_t size, int radix, const char *format, va_list ap)
 {
 	struct snprintf_arg info;
 	int retval;
 
 	info.str = str;
 	info.remain = size;
-	retval = kvprintf(format, snprintf_func, &info, radix, ap);
+	retval = uberspark_uobjrtl_debug__kvprintf(format, uberspark_uobjrtl_debug__snprintf_func, &info, radix, ap);
 	if (info.remain >= 1)
 		*info.str++ = '\0';
 	return (retval);
 }
+
 
 static void
-snprintf_func(int ch, void *arg)
+uberspark_uobjrtl_debug__snprintf_func(int ch, void *arg)
 {
 	struct snprintf_arg *const info = arg;
 
@@ -195,14 +296,37 @@ snprintf_func(int ch, void *arg)
 	}
 }
 
-/*
+/** 
+ * @brief Put a NUL-terminated ASCII number (base <= 36) in a buffer in reverse order
+ * 
+ * @param[in] nbuf
+ * @param[in] num
+ * @param[in] base
+ * @param[in] lenp
+ * @param[in] upper
+ * 
+ * @retval placeholder
+ *  
+ * @details_begin 
  * Put a NUL-terminated ASCII number (base <= 36) in a buffer in reverse
  * order; return an optional length and a pointer to the last character
  * written in the buffer (i.e., the first character of the string).
  * The buffer pointed to by `nbuf' must have length >= MAXNBUF.
+ * @details_end
+ *
+ *  @uobjrtl_namespace{uberspark/uobjrtl/debug}
+ * 
+ * @headers_begin 
+ * #include <uberspark/uobjrtl/crt/include/stdarg.h>
+ * @headers_end
+ * 
+ * @comments_begin
+ * @comments_end
+ * 
+ * 
  */
 static char *
-ksprintn(char *nbuf, uintmax_t num, int base, int *lenp, int upper)
+uberspark_uobjrtl_debug__ksprintn(char *nbuf, uintmax_t num, int base, int *lenp, int upper)
 {
 	char *p, c;
 
@@ -217,9 +341,18 @@ ksprintn(char *nbuf, uintmax_t num, int base, int *lenp, int upper)
 	return (p);
 }
 
-/*
- * Scaled down version of _XDPRINTF_(3).
- *
+/** 
+ * @brief Scaled down version of _XDPRINTF_(3).
+ * 
+ * @param[in] fmt
+ * @param[in] func
+ * @param[in] arg
+ * @param[in] radix
+ * @param[in] ap
+ * 
+ * @retval placeholder
+ *  
+ * @details_begin 
  * Two additional formats:
  *
  * The format %b is supported to decode error registers.
@@ -242,9 +375,21 @@ ksprintn(char *nbuf, uintmax_t num, int base, int *lenp, int upper)
  * XXX:  %D  -- Hexdump, takes pointer and separator string:
  *		("%6D", ptr, ":")   -> XX:XX:XX:XX:XX:XX
  *		("%*D", len, ptr, " " -> XX XX XX XX ...
+ * @details_end
+ *
+ *  @uobjrtl_namespace{uberspark/uobjrtl/debug}
+ * 
+ * @headers_begin 
+ * #include <uberspark/uobjrtl/crt/include/stdarg.h>
+ * @headers_end
+ * 
+ * @comments_begin
+ * @comments_end
+ * 
+ * 
  */
 static int
-kvprintf(char const *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap)
+uberspark_uobjrtl_debug__kvprintf(char const *fmt, void (*func)(int, void*), void *arg, int radix, va_list ap)
 {
 #define PCHAR(c) {int cc=(c); if (func) (*func)(cc,arg); else *d++ = cc; retval++; }
 	char nbuf[MAXNBUF];
@@ -331,7 +476,7 @@ reswitch:	switch (ch = (u_char)*fmt++) {
 		case 'b':
 			num = (u_int)va_arg(ap, int);
 			p = va_arg(ap, char *);
-			for (q = ksprintn(nbuf, num, *p++, NULL, 0); *q;)
+			for (q = uberspark_uobjrtl_debug__ksprintn(nbuf, num, *p++, NULL, 0); *q;)
 				PCHAR(*q--);
 
 			if (num == 0)
@@ -428,7 +573,7 @@ reswitch:	switch (ch = (u_char)*fmt++) {
 			if (p == NULL)
 				p = "(null)";
 			if (!dot)
-				n = strlen (p);
+				n = uberspark_uobjrtl_crt__strlen (p);
 			else
 				for (n = 0; n < dwidth && p[n]; n++)
 					continue;
@@ -503,7 +648,7 @@ number:
 				neg = 1;
 				num = -(intmax_t)num;
 			}
-			p = ksprintn(nbuf, num, base, &n, upper);
+			p = uberspark_uobjrtl_debug__ksprintn(nbuf, num, base, &n, upper);
 			tmp = 0;
 			if (sharpflag && num != 0) {
 				if (base == 8)
